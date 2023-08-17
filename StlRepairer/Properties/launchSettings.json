@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "StlRepairer": {
+      "commandName": "Project",
+      "commandLineArgs": "\"E:\\3D Objects\\Duchies of Vinci\""
+    }
+  }
+}

@@ -1,49 +1,84 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using FluentArgs;
+
 
 namespace StlRepairer {
+
     class Program {
         static async Task Main( string[] args ) {
-            Console.WriteLine( "STLRepairer" );
+            await FluentArgsBuilder.New()
+                .DefaultConfigsWithAppDescription( "STLRepairer" )
+                .Parameter( "-c", "--convert" )
+                    .WithDescription( "Convert file to specified format" )
+                    .WithExamples( "gTLF" )
+                    .IsOptionalWithDefault( "" )
+                .Flag( "-r", "--repair" )
+                    .WithDescription( "Repair file" )
+                .Flag( "-z", "--zero" )
+                    .WithDescription( "Input png file" )
+                .LoadRemainingArguments()
+                    .WithDescription( "All files which should be processed" )
+                .Call( files => zero => repair => convert => Run( files, zero, repair, convert ) )
+                .ParseAsync( args );
+        }
 
-            if( args.Length < 1 ) {
-                Console.WriteLine( "Incorrect number of arguments" );
-                return;
-            } else {
-                string path = Path.GetFullPath( args[0] );
-                Console.WriteLine( $"Repair: {path}" );
+        static async Task Run( IReadOnlyList<string> files, bool zero, bool repair, string convert ) {
+            Console.WriteLine( $"STLRepair: {files}" );
+
+            List<string> fileList = GetFiles( files );
+
+            int index = 1;
+            int count = files.Count;
+            foreach( string file in fileList ) {
+                if( repair ) {
+                    Console.WriteLine( $"Repair file {index} of {count}: {file}" );
+                    await Repair( file );
+                }
+
+                if( zero ) {
+                    Console.WriteLine( $"Zero file {index} of {count}: {file}" );
+                    //Task task = Zero( file );
+                }
+
+                if( String.Equals( convert.ToLower(), "3mf" ) || String.Equals( convert.ToLower(), "gtlf" ) ) {
+                    Console.WriteLine( $"Convert to {convert.ToUpper()} {index} of {count}: {file}" );
+                    await Convert( file, convert.ToLower() );
+                }
+
+                index++;
+            }
+        }
+
+        static List<string> GetFiles( IReadOnlyList<string> files ) {
+            List<string> list = new List<string>();
+
+            foreach( string path in files ) {
 
                 FileAttributes attributes = File.GetAttributes( path );
                 switch( attributes ) {
                     case FileAttributes.Directory:
                         if( Directory.Exists( path ) ) {
-                            int index = 1;
-                            List<string> files = Directory.EnumerateFiles( path, "*.stl", SearchOption.AllDirectories ).Cast<string>().ToList();
-                            files.Sort();
-                            foreach( string file in files ) {
-                                Console.WriteLine( $"Process File {index} of {files.Count}: {file}" );
+                            foreach( string file in Directory.EnumerateFiles( path, "*.stl", SearchOption.AllDirectories ).Cast<string>().ToList() ) {
                                 if( !attributes.HasFlag( FileAttributes.ReadOnly ) ) {
-                                    await Repair( file );
-                                } else {
-                                    Console.WriteLine( $"Skipping READONLY File: {file}" );
+                                    list.Add( file );
                                 }
-                                index++;
                             }
-                        } else {
-                            Console.WriteLine( "This directory does not exist." );
                         }
                         break;
                     default:
                         if( File.Exists( path ) && Path.GetExtension( path ).ToLower().Equals( ".stl" ) && !attributes.HasFlag( FileAttributes.ReadOnly ) ) {
-                            await Repair( path );
-                        } else {
-                            Console.WriteLine( "This file does not exist." );
+                            list.Add( path );
                         }
                         break;
                 }
             }
+
+            list.Sort();
+            return list;
         }
 
         static async Task Repair( string path ) {
@@ -58,6 +93,19 @@ namespace StlRepairer {
 
                 File.Delete( convertedFile );
                 File.Delete( repairedFile );
+            } catch( Exception e ) {
+                Console.WriteLine( e.Message );
+                Console.WriteLine( e );
+            }
+        }
+
+        static async Task Convert( string path, string type ) {
+            string stlFile = path;
+            string convertedFile = Path.ChangeExtension( stlFile, type );
+
+            try {
+                var converter = new Converter( stlFile, convertedFile, type );
+                await converter.Convert();
             } catch( Exception e ) {
                 Console.WriteLine( e.Message );
                 Console.WriteLine( e );

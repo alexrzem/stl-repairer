@@ -2,7 +2,7 @@
   "profiles": {
     "StlRepairer": {
       "commandName": "Project",
-      "commandLineArgs": "\"E:\\3D Objects\\Duchies of Vinci\""
+      "commandLineArgs": "\"E:\\3D Objects\\Tests\\square.stl\" -r -z"
     }
   }
 }

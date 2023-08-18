@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -16,9 +16,26 @@
   <PropertyGroup>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>$(AssemblyName)</Title>
+    <Authors>Alex Rzem</Authors>
+    <Company>rzem.io</Company>
+    <PackageProjectUrl>https://github.com/alexrzem/stl-repairer</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/alexrzem/stl-repairer</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>stl</PackageTags>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>$(AssemblyVersion)</FileVersion>
+    <SignAssembly>False</SignAssembly>
+    <Version>$(AssemblyVersion)</Version>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentArgs" Version="0.9.7" />
+    <PackageReference Include="NETStandard.Library" Version="2.0.3" />
+    <PackageReference Include="SharpGLTF.Core" Version="1.0.0-alpha0030" />
+    <PackageReference Include="SharpGLTF.Runtime" Version="1.0.0-alpha0030" />
+    <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0030" />
     <PackageReference Include="System.IO.Packaging" Version="7.0.0" />
   </ItemGroup>
 
